@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:text="查询用户信息"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/admin_btn_query_user"/>
+
+    <Button
+        android:text="查询书籍信息"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/admin_btn_query_book"/>
+
+    <Button
+        android:text="查询借书记录"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/admin_btn_query_lend"/>
+
+    <Button
+        android:text="增加书籍"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/admin_btn_add"/>
+
+    <Button
+        android:text="更新书籍"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/admin_btn_update"/>
+
+    <Button
+        android:text="删除书籍"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/admin_btn_delete"/>
+
+
+</LinearLayout>

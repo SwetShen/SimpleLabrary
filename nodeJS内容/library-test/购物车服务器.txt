@@ -1,0 +1,129 @@
+//用户查询商品
+router.get('/goods/query',async(ctx,next) => {
+  await next();
+  let result = await tool.query("select * from goods");
+  ctx.body = result;
+})
+
+//用户添加购物车
+router.post('/goods/add',async (ctx,next) => {
+  await next();
+  let uid = ctx.request.body['uid'];
+  let gid = ctx.request.body['gid'];
+  let shopnumber = ctx.request.body['shopnumber'];
+  if(uid == undefined || uid == ''){
+    ctx.body = {'error':'empty uid'}
+    return;
+  }
+  if(gid == undefined || gid == ''){
+    ctx.body = {'error':'empty gid'}
+    return;
+  }
+  if(shopnumber == undefined || shopnumber == ''){
+    shopnumber = 1;
+  }
+  let shopdate = new Date();
+  let params = [parseInt(uid),parseInt(gid),parseInt(shopnumber),shopdate];
+  let n = await tool.query(`select count(*) from shopcar where uid=${uid} and gid=${gid}`);
+  let result;
+  if(n[0]['count(*)'] <= 0){
+    result = await tool.queryParam(`insert into shopcar(uid,gid,shopnumber,shopdate) value(?,?,?,?)`,params);
+  }else{
+    result = await tool.query(`update shopcar set shopnumber = shopnumber + 1 where uid=${uid} and gid=${gid}`)
+  }
+  ctx.body = result
+})
+//购物车数量增加1
+ router.post("/goods/increase",async(ctx,next)=>{
+   await next();
+   let uid = ctx.request.body['uid'];
+  let gid = ctx.request.body['gid'];
+  if(uid == undefined || uid == ''){
+    ctx.body = {'error':'empty uid'}
+    return;
+  }
+  if(gid == undefined || gid == ''){
+    ctx.body = {'error':'empty gid'}
+    return;
+  }
+  let result = await tool.query(`update shopcar set shopnumber = shopnumber + 1
+  where uid=${uid} and gid=${gid}`);
+  ctx.body = result;
+ })
+ //购物车数量减去1
+ router.post("/goods/decrease",async(ctx,next)=>{
+  await next();
+  let uid = ctx.request.body['uid'];
+ let gid = ctx.request.body['gid'];
+ if(uid == undefined || uid == ''){
+   ctx.body = {'error':'empty uid'}
+   return;
+ }
+ if(gid == undefined || gid == ''){
+   ctx.body = {'error':'empty gid'}
+   return;
+ }
+ let result = await tool.query(`update shopcar set shopnumber = shopnumber - 1
+ where uid=${uid} and gid=${gid}`);
+ ctx.body = result;
+})
+//用户查看购物车
+router.get("/goods/car",async (ctx,next) =>{
+  await next();
+  let uid = ctx.query['uid'];
+  let oid = ctx.query['oid'];
+  let result;
+  if(uid == undefined || uid == ''){
+    ctx.body = {'error':'empty uid'}
+    return;
+  }
+  if(oid == undefined || oid == ''){
+    oid = null;
+    result = await tool.query(`select s.gid,gname,gprice,shopnumber,shopdate 
+    from shopcar s,goods g where s.gid = g.gid and uid=${uid} and oid is ${oid};`)
+  }else{
+    oid = null;
+    result = await tool.query(`select s.gid,gname,gprice,shopnumber,shopdate 
+    from shopcar s,goods g where s.gid = g.gid and uid=${uid} and oid is not${oid};`)
+  }
+  ctx.body = result;
+})
+
+//用户提交订单
+router.post("/goods/order",async (ctx,next) =>{
+  await next();
+  let uid = ctx.request.body['uid'];
+  let onumber = ctx.request.body['onumber'];
+  let oprice = ctx.request.body['oprice'];
+  let gids = ctx.request.body['gids'];
+  if(uid == undefined || uid == ''){
+    ctx.body = {'error':'empty uid'}
+    return;
+  }
+  if(onumber == undefined || onumber == ''){
+    ctx.body = {'error':'empty onumber'}
+    return;
+  }
+  if(oprice == undefined || oprice == ''){
+    ctx.body = {'error':'empty oprice'}
+    return;
+  }
+  if(gids == undefined || gids == ''){
+    ctx.body = {'error':'empty gids'}
+    return;
+  }
+  let odate = new Date().format("yyyy-MM-dd hh:mm:ss");
+  let params = [uid,onumber,oprice,odate]
+  await tool.queryParam(`insert into shoporder(uid,onumber,oprice,odate) value(?,?,?,?)`,params);
+  let result = await tool.query(`select oid from shoporder where uid=${uid} and odate='${odate}'`);
+  console.log(gids);
+  let oid = result[0]['oid'];
+  if(oid){
+    if(gids.length > 0){
+      for(let gid of gids){
+        await tool.query(`update shopcar set oid=${oid} where gid=${gid} and uid=${uid}`);
+      }
+    }
+  }
+  ctx.body = result;
+})
